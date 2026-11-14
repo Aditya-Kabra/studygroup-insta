@@ -1,0 +1,57 @@
+name: Plan and post
+
+on:
+  schedule:
+    # 09:00, 12:00, 15:00, 18:00, 21:00 IST
+    - cron: "30 3,6,9,12,15 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: sginsta-post
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: |
+          git config user.name "studygroup-bot"
+          git config user.email "studygroup-bot@users.noreply.github.com"
+
+      - name: Queue the next session's posts and this week's tip or spotlight
+        run: python -m sginsta plan
+
+      # Instagram fetches images from a public URL, so new images are pushed first
+      # and then served from raw.githubusercontent.com at that exact commit.
+      - name: Push new posts
+        run: |
+          git add posts
+          if ! git diff --cached --quiet; then
+            git commit -m "Queue posts $(date -u +%F)"
+            git pull --rebase --quiet && git push
+          fi
+          echo "MEDIA_BASE=https://raw.githubusercontent.com/${{ github.repository }}/$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Post to Instagram
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python -m sginsta publish
+
+      - name: Save posting history
+        if: always()
+        run: |
+          git add posts
+          if ! git diff --cached --quiet; then
+            git commit -m "Posted $(date -u +%F)"
+            git pull --rebase --quiet && git push
+          fi

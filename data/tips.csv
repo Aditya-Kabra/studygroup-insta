@@ -1,0 +1,5 @@
+id,title,body,status
+01,Ask it to interview you first,"Before you ask an AI to build something, tell it: ""Ask me questions one at a time until you understand what I want."" You'll get a better first try and learn what you hadn't decided yet.",draft
+02,Make it show its plan,"Ask for a numbered plan before any code. Read it, fix the one step that's wrong, then say go. Two minutes here saves twenty later.",draft
+03,Paste the error back,"When something breaks, paste the full error message, not a summary. The answer is usually in the last three lines.",draft
+04,Start smaller than you think,"Pick the version you could show in one minute. A tiny thing that works beats a big thing that almost does.",draft
