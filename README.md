@@ -24,6 +24,7 @@ see exactly what will go out. `status` is:
 - `draft`: held. Nothing happens until you approve it.
 - `ready`: goes out at `publish_at`.
 - `posted` / `failed`: done; `failed` keeps the error.
+- `expired`: was more than a day overdue (say the token was missing), so it was skipped.
 
 Announcements wait one run after being queued, so you have about three hours to hold one.
 To hold or release a post, edit `status` on GitHub, or locally:

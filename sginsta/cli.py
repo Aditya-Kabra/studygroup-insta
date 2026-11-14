@@ -1,6 +1,6 @@
 import argparse
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from . import config as C, instagram, posts
@@ -14,6 +14,12 @@ def cmd_plan(a):
 def cmd_publish(a):
     """Publish the earliest due post. One per run, so the feed never gets a burst."""
     due = [p for p in posts.all_posts() if p["status"] == "ready" and p["publish_at"] <= posts.now().isoformat()]
+    stale = (posts.now() - timedelta(hours=24)).isoformat()
+    for p in [p for p in due if p["publish_at"] < stale]:
+        p["status"] = "expired"  # a day late is too late; approve it again with a new publish_at to post it
+        posts.save(p)
+        print(f"Expired {p['id']}")
+    due = [p for p in due if p["status"] == "ready"]
     if not due:
         print("Nothing due")
         return
